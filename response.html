@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Missions API Call</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545 !important;
+            background-color: #f8d7da !important;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Missions API Call</h1>
+        <p><strong>Endpoint:</strong> https://platformqa.octro.com:3443/missionconsumer/getUserMissions</p>
+        
+        <button onclick="getUserMissions()">Get User Missions</button>
+        
+        <div id="result" style="display: none;">
+            <h3>Response:</h3>
+            <pre id="response-content"></pre>
+        </div>
+    </div>
+
+    <script>
+        function getUserMissions() {
+            // Show loading state
+            const resultDiv = document.getElementById('result');
+            const responseContent = document.getElementById('response-content');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('error');
+            responseContent.textContent = 'Loading...';
+            responseContent.className = 'loading';
+            
+            // Request payload
+            const requestData = {
+                "action": "getUserMissions",
+                "gocid": "c0e5f6e7-e46c-11ef-a92b-002590e818fa",
+                "appid": "20220906uXoo",
+                "data_from": "dd",
+                // "requestContext": true
+            };
+            //for updatUserProgress
+    //         const requestData = {
+    //             "action": "updateUserProgress",
+    // "appid":"20220906uXoo", 
+    // "data_from":"dd",
+    // "gocid": "c0e5f6e7-e46c-11ef-a92b-002590e818fa",
+    // "MissionCategory": "gameplay",
+    // "UserMissionTemplateID":[],
+    // "Value": "join",
+    // "ProgressTime":1751893200000,
+
+    //         };
+            
+            // AJAX call using fetch API
+            fetch('https://platformqa.octro.com:3443/missionconsumer/getUserMissions', {
+            // fetch('https://platformqa.octro.com:3443/missionconsumer/updateUserProgress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display successful response
+                responseContent.className = '';
+                responseContent.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                // Display error
+                resultDiv.classList.add('error');
+                responseContent.className = '';
+                responseContent.textContent = `Error: ${error.message}`;
+                console.error('Error:', error);
+            });
+        }
+
+        // Alternative using jQuery AJAX (uncomment if you prefer jQuery)
+        /*
+        function getUserMissionsJQuery() {
+            const resultDiv = document.getElementById('result');
+            const responseContent = document.getElementById('response-content');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('error');
+            responseContent.textContent = 'Loading...';
+            responseContent.className = 'loading';
+            
+            const requestData = {
+                "action": "getUserMissions",
+                "gocid": "310ad583-2a72-11f0-92f5-002590e818fa",
+                "appid": "20220906uXoo",
+                "data_from": "dd",
+                "requestContext": true
+            };
+            
+            $.ajax({
+                type: "POST",
+                url: "https://platformqa.octro.com:3443/missionconsumer/getUserMissions",
+                data: JSON.stringify(requestData),
+                contentType: "application/json",
+                dataType: "json",
+                success: function(data) {
+                    responseContent.className = '';
+                    responseContent.textContent = JSON.stringify(data, null, 2);
+                },
+                error: function(xhr, status, error) {
+                    resultDiv.classList.add('error');
+                    responseContent.className = '';
+                    responseContent.textContent = `Error: ${error}\nStatus: ${status}\nResponse: ${xhr.responseText}`;
+                }
+            });
+        }
+        */
+    </script>
+</body>
+</html>
+
+
+
+
+<!-- ===========================comments================ -->
+  <!-- // filtered.forEach((mission, idx) => {
+    //   const progress = mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0;
+    //   const status = getMissionStatus(mission);
+    //   const statusText = status === 'go' ? 'Go' : 
+    //                    status === 'claim' ? 'Claim' : 
+    //                    status === 'completed' ? 'Completed' : 'Expired';
+    //   const card = document.createElement("div");
+    //   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+    //   card.innerHTML = `
+    //     <div class="mission-header">
+    //       <div>
+    //         <div class="mission-title">${mission.Title || 'Untitled Mission'}</div>
+    //         <div class="mission-subtitle">
+    //           ${mission.MissionType || 'Mission'} • ${mission.MissionTagName || 'General'} • 
+    //           Progress: ${mission.Progress || 0}/${mission.Requirement || 0}
+    //         </div>
+    //       </div>
+    //       ${getRewardDisplay(mission.MissionReward, idx)}
+    //     </div>
+    //     <div class="progress-bar">
+    //       <div class="progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+    //     </div>
+    //     <div class="mission-footer">
+    //       <span class="expiry">Expires: ${formatExpiry(mission.ExpiryDate)}</span>
+    //       <button class="btn ${status}">${statusText}</button>
+    //     </div>
+    //     ${renderChildMissions(mission.Children,idx)}
+    //   `;
+    //   missionsContainer.appendChild(card);
+    // });
+
+    //2nd change for filtered.foreach
+// filtered.forEach((mission, idx) => {
+//   const groupCompleted = isGroupCompleted(mission);
+//   const progress = mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0;
+//   const status = getMissionStatus(mission);
+//   const statusText = status === 'go' ? 'Go' : 
+//                        status === 'claim' ? 'Claim' : 
+//                        status === 'completed' ? 'Completed' : 'Expired';
+//   const card = document.createElement("div");
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title || 'Untitled Mission'} 
+//           ${mission.MissionType === "Group" && groupCompleted ? 
+//             `<span class="btn completed" style="margin-left:12px;">Completed</span>` : '' }
+//         </div>
+//         <div class="mission-subtitle">
+//           ${mission.MissionType || 'Mission'} • ${mission.MissionTagName || 'General'}
+//           ${mission.MissionType !== "Group" ? ` • Progress: ${mission.Progress || 0}/${mission.Requirement || 0}` : ""}
+//         </div>
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${mission.MissionType !== "Group" && mission.Requirement > 0 ? `
+//       <div class="progress-bar">
+//         <div class="progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+//       </div>
+//     ` : ''}
+//     <div class="mission-footer">
+//       <span class="expiry">Expires: ${formatExpiry(mission.ExpiryDate)}</span>
+//       ${(mission.MissionType !== "Group" && status) ? `<button class="btn ${status}">${statusText}</button>` : ""}
+//     </div>
+//     ${renderChildMissions(mission.Children, idx)}
+//   `;
+//   missionsContainer.appendChild(card);
+// }); -->
+
+
+<!-- 
+
+//   function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">
+//     ${children.map((child, childIdx) => {
+//       const progress = child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0;
+//       const status = getMissionStatus(child);
+//       const statusText = status === 'go' ? 'Go' : 
+//                        status === 'claim' ? 'Claim' : 
+//                        status === 'completed' ? 'Completed' : 'Expired';
+//       // Compose unique index string for child missions
+//       const uniqueIdx = `${parentIdx}-${childIdx}`;
+
+//       return `<div class="child-mission">
+//         <div class="mission-header">
+//           <div>
+//             <div class="mission-title" style="font-size: 14px;">${child.Title || 'Untitled Mission'}</div>
+//             <div class="mission-subtitle">${child.MissionCategory || 'General'} • ${child.Progress || 0}/${child.Requirement || 0}</div>
+//           </div>
+//           ${getRewardDisplay(child.MissionReward, uniqueIdx)}
+//         </div>
+//         <div class="progress-bar">
+//           <div class="progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+//         </div>
+//         <div class="mission-footer">
+//           <span class="expiry">Expires: ${formatExpiry(child.ExpiryDate)}</span>
+//           <button class="btn ${status}">${statusText}</button>
+//         </div>
+//       </div>`;
+//     }).join('')}
+//   </div>`;
+// }
+// function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">
+//     ${children.map((child, childIdx) => {
+//       const progress = child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0;
+//       const status = getMissionStatus(child);
+//       const statusText = status === 'go' ? 'Go' : 
+//                        status === 'claim' ? 'Claim' : 
+//                        status === 'completed' ? 'Completed' : 'Expired';
+//       const uniqueIdx = `${parentIdx}-${childIdx}`;
+
+//       return `<div class="child-mission">
+//         <div class="mission-header">
+//           <div>
+//             <div class="mission-title" style="font-size: 14px;">${child.Title || 'Untitled Mission'}</div>
+//             <div class="mission-subtitle">${child.MissionCategory || 'General'} • ${child.Progress || 0}/${child.Requirement || 0}</div>
+//           </div>
+//           ${getRewardDisplay(child.MissionReward, uniqueIdx)}
+//         </div>
+//         ${child.Requirement > 0 ? `
+//         <div class="progress-bar">
+//           <div class="progress-fill" style="width:${Math.min(progress, 100)}%;"></div>
+//         </div>` : ''}
+//         <div class="mission-footer">
+//           <span class="expiry">Expires: ${formatExpiry(child.ExpiryDate)}</span>
+//           ${status ? `<button class="btn ${status}">${statusText}</button>` : ``}
+//         </div>
+//       </div>`;
+//     }).join('')}
+//   </div>`;
+// } -->
+
+
+
+
+
+<!-- =========================styling-old======================
+  -->
+
+  <!-- <style>
+    /* Base Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #0b2d6e, #051639);
+      color: white;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 32px 16px 40px 16px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #ffcc00;
+      text-shadow: 2px 2px 6px #000;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      max-width: 200px;
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      background: #0d1b3a;
+      font-size: 16px;
+      color: white;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .tab-btn.active {
+      background: #1e90ff;
+      font-weight: bold;
+      border: 2px solid #ffcc00;
+    }
+
+    /* Missions Layout */
+    .missions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Mission Card */
+    .mission-card {
+  background: #0d1b3a;
+  border-radius: 16px;
+  padding: 28px 24px 22px 24px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 340px;     /* Ensure minimum height */
+  height: 100%;          /* Make cards fill grid cell */
+}
+
+
+    .mission-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mission-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .mission-subtitle {
+      font-size: 13px;
+      color: #cfd6e3;
+      margin-top: 6px;
+    }
+
+    .reward, .multiple-rewards {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 35px;
+    }
+
+    .reward-img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      border-radius: 4px;
+      background: #fff3;
+      margin-right: 6px;
+      box-shadow: 0 2px 6px #2223;
+    }
+
+    .multiple-rewards-btn {
+      background: none;
+      color: #ffcc00;
+      border: 1.7px solid #ffcc00;
+      border-radius: 7px;
+      padding: 4px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      transition: background 0.15s;
+    }
+    .multiple-rewards-btn:hover {
+      background: #0004;
+    }
+
+    .mission-footer {
+      margin-top: 9px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .expiry {
+      color: #ff6666;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .btn.go { background: #1e90ff; }
+    .btn.claim { background: #28a745; }
+    .btn.expired { background: #dc3545; }
+    .btn.completed { background: #6c757d; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #aaa;
+    }
+
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #ff6666;
+      background: rgba(220, 53, 69, 0.1);
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .group-mission {
+      border-left: 4px solid #ffcc00;
+    }
+
+    .child-missions {
+      margin-left: 20px;
+      margin-top: 12px;
+    }
+
+    .child-mission {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 2px solid #1e90ff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      margin: 2px 0 4px 0;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 12px;
+      width: 100%;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: orange;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(6,19,38,0.80);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .reward-modal {
+      background: #141a33;
+      color: #fff;
+      padding: 34px 22px 26px 22px;
+      border-radius: 15px;
+      max-width: 410px;
+      width: 94vw;
+      box-shadow: 0 8px 34px #091a4188;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      text-align: center;
+    }
+    .reward-modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: .5px;
+      margin-bottom: 18px;
+      color: #ffcc00;
+    }
+    .close-modal {
+      position: absolute;
+      right: 18px;
+      top: 14px;
+      font-size: 22px;
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .rewards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 7px;
+      justify-content: center;
+      margin: 7px 0 3px 0;
+    }
+    .reward-modal-item {
+      background: #1b2444;
+      border-radius: 8px;
+      padding: 9px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 180px;
+      margin-bottom: 2px;
+    }
+
+    .reward-modal-img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #fff3;
+      box-shadow: 0 1.5px 8px #2222;
+    }
+    .reward-modal-label {
+      font-weight: 500;
+      color: #ffcc00;
+    }
+    .progress-day {
+  user-select: none;
+  box-shadow: 0 0 3px #2e7d32aa;
+}
+
+.progress-segment {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 5px;
+}
+
+.daily-progress-dropdown {
+  margin: 6px 0;
+}
+
+.daily-progress-toggle {
+  background: #444;
+  color: #fff;
+  border: 1px solid #fff3;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  display: inline-block;
+  transition: background 0.2s;
+}
+
+.daily-progress-toggle:hover {
+  background: #0051fa;
+  color: #fff;
+}
+
+.daily-progress-bars {
+  margin-top: 8px;
+  padding-bottom: 8px;
+}
+
+.daily-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0;
+}
+
+.daily-bar-label {
+  font-size: 13px;
+  color: #cfd6e3;
+  width: 60px;
+  text-align: right;
+}
+
+.daily-bar {
+  height: 12px;
+  width: 120px; /* fixed width for equal size */
+  background: #333;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.daily-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 6px;
+  transition: width .3s;
+}
+
+.daily-bar-fill.completed {
+  background: #4CAF50;
+}
+
+.daily-bar-fill.incomplete {
+  background: #e55353;
+}
+
+    @media (min-width: 768px) {
+      .missions-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      .mission-card {
+        padding: 28px 28px 28px 28px;
+      }
+
+      .mission-title {
+        font-size: 20px;
+      }
+
+      .btn {
+        font-size: 15px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .missions-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .title {
+        font-size: 40px;
+      }
+
+      .tab-btn {
+        font-size: 18px;
+        padding: 14px;
+      }
+    }
+  </style> -->
+
+
+
+
+
+
+
+  <!-- ========================styling-2nd===========
+    -->
+<!-- 
+    <style>
+/* Base Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #6B46C1 0%, #3B1F8B 50%, #1E0B4B 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 32px 16px 40px 16px;
+}
+
+.title {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 30px;
+  background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+  letter-spacing: 2px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.tab-btn {
+  flex: 1;
+  max-width: 220px;
+  padding: 15px 20px;
+  border: 2px solid #FFD700;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(107, 70, 193, 0.8), rgba(59, 31, 139, 0.8));
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFD700;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #3B1F8B;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.tab-btn:hover:not(.active) {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  transform: translateY(-2px);
+}
+
+/* Missions Layout */
+.missions-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 25px;
+  align-items: stretch;
+  padding: 20px 0;
+}
+
+/* Mission Card */
+.mission-card {
+  background: linear-gradient(145deg, rgba(107, 70, 193, 0.9), rgba(59, 31, 139, 0.9));
+  border: 2px solid #FFD700;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
+              0 0 20px rgba(255, 215, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 340px;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.mission-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+}
+
+.group-mission {
+  border-color: #FFD700;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
+              0 0 25px rgba(255, 215, 0, 0.3);
+}
+
+.mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.mission-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFD700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+}
+
+.mission-subtitle {
+  font-size: 14px;
+  color: #E2D1FF;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.reward, .multiple-rewards {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 215, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.reward-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.multiple-rewards-btn {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  color: #FFD700;
+  border: 1px solid #FFD700;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.multiple-rewards-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+  transform: translateY(-1px);
+}
+
+/* Child Missions */
+.child-missions {
+  margin-left: 0;
+  margin-top: 15px;
+}
+
+.child-mission {
+  background: linear-gradient(135deg, rgba(75, 45, 155, 0.6), rgba(45, 25, 95, 0.6));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 18px;
+  border-radius: 15px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.child-mission .mission-title {
+  font-size: 16px;
+  color: #FFF;
+}
+
+.child-mission .mission-subtitle {
+  color: #D1C4E9;
+}
+
+/* Progress Bars */
+.progress-bar {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  overflow: hidden;
+  height: 8px;
+  margin: 12px 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ADE80, #22C55E);
+  border-radius: 15px;
+  transition: width 0.8s ease;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+
+/* Daily Progress Components */
+.daily-progress-toggle {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.daily-progress-toggle:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+}
+
+.daily-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.daily-bar-fill.completed {
+  background: linear-gradient(90deg, #4ADE80, #22C55E);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+
+.daily-bar-fill.incomplete {
+  background: linear-gradient(90deg, #EF4444, #DC2626);
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn.go {
+  background: linear-gradient(135deg, #4ADE80, #22C55E);
+  box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+}
+
+.btn.go:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 222, 128, 0.6);
+}
+
+.btn.go:disabled {
+  background: linear-gradient(135deg, #6B7280, #4B5563);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn.claim {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #3B1F8B;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.btn.claim:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.btn.completed {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.btn.expired {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+}
+
+.mission-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.expiry {
+  color: #F87171;
+  font-weight: 600;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(30, 11, 75, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-modal {
+  background: linear-gradient(145deg, rgba(107, 70, 193, 0.95), rgba(59, 31, 139, 0.95));
+  border: 2px solid #FFD700;
+  color: #fff;
+  padding: 35px 25px;
+  border-radius: 20px;
+  max-width: 450px;
+  width: 95vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.reward-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFD700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.reward-modal-item {
+  background: rgba(75, 45, 155, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  padding: 12px 18px;
+}
+
+/* Loading and Error States */
+.loading, .error {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  border-radius: 15px;
+  margin: 20px 0;
+}
+
+.loading {
+  background: linear-gradient(135deg, rgba(107, 70, 193, 0.3), rgba(59, 31, 139, 0.3));
+  color: #E2D1FF;
+}
+
+.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+  border: 1px solid #EF4444;
+  color: #FCA5A5;
+}
+/* Filter Dropdown Styles */
+.filter-section {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-btn {
+  background: linear-gradient(135deg, rgba(107, 70, 193, 0.8), rgba(59, 31, 139, 0.8));
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  transform: translateY(-2px);
+}
+
+.dropdown-arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.filter-btn.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.filter-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(145deg, rgba(107, 70, 193, 0.95), rgba(59, 31, 139, 0.95));
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  margin-top: 5px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.filter-option {
+  padding: 12px 20px;
+  color: #E2D1FF;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-option:hover {
+  background: rgba(255, 215, 0, 0.1);
+  color: #FFD700;
+}
+
+.filter-option.active {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+  color: #FFD700;
+  font-weight: 700;
+}
+
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .missions-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+  
+  .mission-title {
+    font-size: 22px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .missions-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .title {
+    font-size: 56px;
+  }
+}
+</style> -->
+
+
+
+
+<!-- ==================3rd styling================= -->
+
+<!--
+<style>
+/* Base Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #4C1D95 0%, #2D1B69 50%, #1E1B4B 100%);
+  color: white;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 32px 16px 40px 16px;
+}
+
+.title {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 25px;
+  background: linear-gradient(45deg, #FBBF24, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.tab-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 12px 18px;
+  border: 1px solid #FBBF24;
+  cursor: pointer;
+  background: rgba(76, 29, 149, 0.4);
+  font-size: 15px;
+  font-weight: 500;
+  color: #FBBF24;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  color: #1E1B4B;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.tab-btn:hover:not(.active) {
+  background: rgba(251, 191, 36, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Filter Dropdown Styles */
+.filter-section {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-btn {
+  background: rgba(76, 29, 149, 0.6);
+  color: #FBBF24;
+  border: 1px solid #FBBF24;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.3s ease;
+}
+
+.filter-btn.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.filter-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(76, 29, 149, 0.9);
+  border: 1px solid #FBBF24;
+  border-radius: 8px;
+  margin-top: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.filter-option {
+  padding: 10px 16px;
+  color: #E5E7EB;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.1);
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-option:hover {
+  background: rgba(251, 191, 36, 0.1);
+  color: #FBBF24;
+}
+
+.filter-option.active {
+  background: rgba(251, 191, 36, 0.2);
+  color: #FBBF24;
+  font-weight: 500;
+}
+
+/* Missions Layout */
+.missions-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+  padding: 15px 0;
+}
+
+/* Mission Card */
+.mission-card {
+  background: rgba(76, 29, 149, 0.4);
+  border: 1px solid #FBBF24;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 320px;
+  height: 100%;
+  backdrop-filter: blur(5px);
+}
+
+.group-mission {
+  border-color: #FBBF24;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mission-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #FBBF24;
+  line-height: 1.3;
+}
+
+.mission-subtitle {
+  font-size: 13px;
+  color: #D1D5DB;
+  margin-top: 6px;
+  opacity: 0.8;
+}
+
+.reward, .multiple-rewards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.reward-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.multiple-rewards-btn {
+  background: rgba(251, 191, 36, 0.1);
+  color: #FBBF24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.multiple-rewards-btn:hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+/* Child Missions */
+.child-missions {
+  margin-left: 0;
+  margin-top: 12px;
+}
+
+.child-mission {
+  background: rgba(55, 20, 120, 0.4);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.child-mission .mission-title {
+  font-size: 16px;
+  color: #F3F4F6;
+}
+
+.child-mission .mission-subtitle {
+  color: #D1D5DB;
+}
+
+/* Progress Bars */
+.progress-bar {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 6px;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981, #059669);
+  border-radius: 8px;
+  transition: width 0.6s ease;
+}
+
+/* Daily Progress Components */
+.daily-progress-toggle {
+  background: rgba(251, 191, 36, 0.1);
+  color: #FBBF24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.daily-progress-toggle:hover {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+.daily-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+}
+
+.daily-bar-fill.completed {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+
+.daily-bar-fill.incomplete {
+  background: linear-gradient(90deg, #EF4444, #DC2626);
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn.go {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn.go:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn.go:disabled {
+  background: linear-gradient(135deg, #6B7280, #4B5563);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn.claim {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  color: #1E1B4B;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.btn.claim:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+}
+
+.btn.completed {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.btn.expired {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+}
+
+.mission-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.expiry {
+  color: #F87171;
+  font-weight: 500;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(30, 27, 75, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reward-modal {
+  background: rgba(76, 29, 149, 0.9);
+  border: 1px solid #FBBF24;
+  color: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.reward-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #FBBF24;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.reward-modal-item {
+  background: rgba(55, 20, 120, 0.5);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 10px;
+  padding: 10px 15px;
+}
+
+/* Loading and Error States */
+.loading, .error {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.loading {
+  background: rgba(76, 29, 149, 0.3);
+  color: #D1D5DB;
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #EF4444;
+  color: #FCA5A5;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .missions-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+  
+  .mission-title {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .missions-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .title {
+    font-size: 48px;
+  }
+}
+</style>
+-->
+
+
+
+
+
+
+
+
+<!-- 
+//3rd change for renderedchildmission
+// function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">${children.map((child, idx) => {
+//     let activityArray = [];
+//     try {
+//       activityArray = child.ActivityString ? JSON.parse(child.ActivityString) : [];
+//     } catch {
+//       activityArray = [];
+//     }
+//     const { claimable } = analyzeMissionProgress(activityArray, child.Requirement, child.RequiredDays, child.Consecutive);
+//     let status = 'go';
+//     let statusText = 'Go';
+//     if (claimable) {
+//       status = 'claim';
+//       statusText = 'Claim';
+//     }
+//     if (child.Claimed) {
+//       status = 'completed';
+//       statusText = 'Completed';
+//     }
+//     const progress = child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0;
+//     const progressPanelHtml = (child.Requirement > 0 && child.ActivityString)
+//       ? renderProgressPanel(activityArray, child.Requirement, child.RequiredDays, child.Consecutive)
+//       : '';
+//     const uniqueIdx = `${parentIdx}-${idx}`;
+//     return `<div class="child-mission">
+//       <div class="mission-header">
+//         <div>
+//           <div class="mission-title">${child.Title}</div>
+//           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
+//         </div>
+//         ${getRewardDisplay(child.MissionReward, uniqueIdx)}
+//       </div>
+//       ${progressPanelHtml}
+//      ${child.ActivityString && child.Requirement > 0
+//   ? renderDailyProgressBars(JSON.parse(child.ActivityString), child.Requirement)
+//   : ''}
+
+//       <div class="mission-footer">
+//         <span class="expiry">${child.ExpiryDate ? 'Expires: ' + child.ExpiryDate : ''}</span>
+//         <button class="btn ${status}">${statusText}</button>
+//       </div>
+//     </div>`;
+//   }).join('')}</div>`;
+// }
+// function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">${children.map((child, idx) => {
+//     let activityArray = [];
+//     try {
+//       activityArray = child.ActivityString ? JSON.parse(child.ActivityString) : [];
+//     } catch {
+//       activityArray = [];
+//     }
+//     const uid = child.UserMissionTemplateID || `child${parentIdx}-${idx}`;
+//     const { claimable } = analyzeMissionProgress(activityArray, child.Requirement, child.RequiredDays, child.Consecutive);
+//     let status = 'go';
+//     let statusText = 'Go';
+//     if (claimable) {
+//       status = 'claim';
+//       statusText = 'Claim';
+//     }
+//     if (child.Claimed) {
+//       status = 'completed';
+//       statusText = 'Completed';
+//     }
+//     return `<div class="child-mission">
+//       <div class="mission-header">
+//         <div>
+//           <div class="mission-title">${child.Title}</div>
+//           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
+//         </div>
+//         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
+//       </div>
+//       ${child.Requirement > 0 ? renderOverallProgressBar(child.Progress, child.Requirement) : ''}
+//       ${child.ActivityString && child.Requirement > 0 ? dailyProgressDropdown(activityArray, child.Requirement, uid) : ''}
+//       <div class="mission-footer">
+//         <span class="expiry">${child.ExpiryDate ? 'Expires: ' + child.ExpiryDate : ''}</span>
+//         <button class="btn ${status}">${statusText}</button>
+//       </div>
+//     </div>`;
+//   }).join('')}</div>`;
+// }
+// function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">${children.map((child, idx) => {
+//     let activityArray = [];
+//     try {
+//       activityArray = child.ActivityString ? JSON.parse(child.ActivityString) : [];
+//     } catch {
+//       activityArray = [];
+//     }
+
+//     const { claimable,completed } = analyzeMissionProgress(activityArray, child.Requirement, child.RequiredDays, child.Consecutive);
+//     const canClaim = claimable ;
+
+//     let status = 'go';
+//     let statusText = 'Go';
+//     if (canClaim) {
+//       status = 'claim';
+//       statusText = 'Claim';
+//     }
+//     if (child.Claimed) {
+//       status = 'completed';
+//       statusText = 'Completed';
+//     }
+
+//     // Progress bar calculation for child
+//     const progressBarPercent = canClaim || child.Claimed
+//       ? 100
+//       : Math.min(child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0, 100);
+
+//     const uid = child.UserMissionTemplateID || `child${parentIdx}-${idx}`;
+
+//     return `<div class="child-mission">
+//       <div class="mission-header">
+//         <div>
+//           <div class="mission-title">${child.Title}</div>
+//           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
+//         </div>
+//         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
+//       </div>
+//       ${child.Requirement > 0 ? `
+//         <div class="progress-bar" style="margin: 6px 0;">
+//           <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+//         </div>` : ''}
+//       ${child.ActivityString && child.Requirement > 0
+//         ? dailyProgressDropdown(activityArray, child.Requirement, uid)
+//         : ''}
+//       <div class="mission-footer">
+//         <span class="expiry">${child.ExpiryDate ? 'Expires: ' + child.ExpiryDate : ''}</span>
+//         ${
+//   status === 'go'
+//     ? (child.Deeplink
+//         ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
+//         : `<button class="btn go" disabled>Go</button>`)
+//     : `<button class="btn ${status}">${statusText}</button>`
+// }
+
+//       </div>
+//     </div>`;
+//   }).join('')}</div>`;
+// }
+// 
+
+   
+//3rd change for filtered.foreach
+// filtered.forEach((mission, idx) => {
+//   const progress = mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0;
+
+//   // Parse Activity String safely
+//   let activityArray;
+//   try {
+//     activityArray = mission.ActivityString ? JSON.parse(mission.ActivityString) : [];
+//   } catch {
+//     activityArray = [];
+//   }
+
+//   // Analyze progress
+//   const { claimable } = analyzeMissionProgress(activityArray, mission.Requirement, mission.RequiredDays, mission.Consecutive);
+
+//   // Determine status and button text
+//   let status = 'go';
+//   let statusText = 'Go';
+//   if (claimable) {
+//     status = 'claim';
+//     statusText = 'Claim';
+//   }
+//   if (mission.Claimed) {
+//     status = 'completed';
+//     statusText = 'Completed';
+//   }
+
+//   // Check if group is completed
+//   const groupCompleted = isGroupCompleted(mission);
+  
+//   const progressPanelHtml = (mission.Requirement > 0 && mission.ActivityString) && (mission.MissionType !== 'Group')
+//     ? renderProgressPanel(activityArray, mission.Requirement, mission.RequiredDays, mission.Consecutive)
+//     : '';
+
+//   let card = document.createElement('div');
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mention' : ''}`;
+  
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title}
+//           ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+//         </div>
+       
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${progressPanelHtml}
+//     ${mission.MissionType !== 'Group' && mission.ActivityString && mission.Requirement > 0
+//   ? renderDailyProgressBars(JSON.parse(mission.ActivityString), mission.Requirement)
+//   : ''}
+
+//     <div class="mission-footer">
+//       <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
+//       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+//     </div>
+//     ${renderChildMissions(mission.Children, idx)}
+//   `;
+
+//   missionsContainer.appendChild(card);
+// });
+
+// filtered.forEach((mission, idx) => {
+//   // Parse daily progress array
+//   let activityArray;
+//   try {
+//     activityArray = mission.ActivityString ? JSON.parse(mission.ActivityString) : [];
+//   } catch {
+//     activityArray = [];
+//   }
+//   const uid = mission.UserMissionTemplateID || `mission${idx}`;
+
+//   // Analyze progress for claim logic
+//   const { claimable } = analyzeMissionProgress(activityArray, mission.Requirement, mission.RequiredDays, mission.Consecutive);
+//   let status = 'go';
+//   let statusText = 'Go';
+//   if (claimable) {
+//     status = 'claim';
+//     statusText = 'Claim';
+//   }
+//   if (mission.Claimed) {
+//     status = 'completed';
+//     statusText = 'Completed';
+//   }
+
+//   // Group completion logic
+//   const groupCompleted = isGroupCompleted(mission);
+
+//   // Build the card HTML
+//   let card = document.createElement('div');
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title}
+//           ${mission.MissionType === 'Group' && groupCompleted ?
+//             `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+//         </div>
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${mission.MissionType !== 'Group' && mission.Requirement > 0
+//       ? renderOverallProgressBar(mission.Progress, mission.Requirement)
+//       : ''}
+//     ${mission.MissionType !== 'Group' && mission.ActivityString && mission.Requirement > 0
+//       ? dailyProgressDropdown(activityArray, mission.Requirement, uid)
+//       : ''}
+//     <div class="mission-footer">
+//       <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
+//       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+//     </div>
+//     ${renderChildMissions(mission.Children, idx)}
+//   `;
+//   missionsContainer.appendChild(card);
+// });
+// filtered.forEach((mission, idx) => {
+//   // Parse daily activity array safely
+//   let activityArray;
+//   try {
+//     activityArray = mission.ActivityString ? JSON.parse(mission.ActivityString) : [];
+//   } catch {
+//     activityArray = [];
+//   }
+
+//   // Analyze daily progress to check claimable based on requirements
+//   const { claimable } = analyzeMissionProgress(activityArray, mission.Requirement, mission.RequiredDays, mission.Consecutive);
+
+//   // Combined check: claim only if consecutive condition AND overall progress fulfilled
+//   const canClaim = claimable && (mission.Progress >= mission.Requirement);
+
+//   let status = 'go';
+//   let statusText = 'Go';
+//   if (canClaim) {
+//     status = 'claim';
+//     statusText = 'Claim';
+//   }
+//   if (mission.Claimed) {
+//     status = 'completed';
+//     statusText = 'Completed';
+//   }
+
+//   // Progress bar calculation
+//   // const progressBarPercent = canClaim || mission.Claimed
+//   //   ? 100
+//   //   : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+
+
+//   const progressBarPercent = canClaim || mission.Claimed
+//   ? 100
+//   : claimable  // if daily streak condition met, but total progress not full yet
+//     ? Math.min(mission.Progress / mission.Requirement * 100, 100)
+//     : 0;       // no daily progress streak yet, so progress bar shows 0%
+
+//   // Check if group completed
+//   const groupCompleted = isGroupCompleted(mission);
+
+//   let card = document.createElement('div');
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title}
+//           ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+//         </div>
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+//       <div class="progress-bar" style="margin: 10px 0;">
+//         <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+//       </div>
+//     ` : ''}
+//     ${mission.MissionType !== 'Group' && mission.ActivityString && mission.Requirement > 0
+//       ? dailyProgressDropdown(activityArray, mission.Requirement, mission.UserMissionTemplateID || `mission${idx}`)
+//       : ''}
+//     <div class="mission-footer">
+//       <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
+//       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+//     </div>
+//     ${renderChildMissions(mission.Children, idx)}
+//   `;
+
+//   missionsContainer.appendChild(card);
+// });
+
+
+// filtered.forEach((mission, idx) => {
+//   let status = 'go';
+//   let statusText = 'Go';
+  
+//   // Simple check: progress >= requirement
+//   if (mission.Progress >= mission.Requirement && mission.Requirement > 0) {
+//     status = 'claim';
+//     statusText = 'Claim';
+//   }
+//   if (mission.Claimed) {
+//     status = 'completed';
+//     statusText = 'Completed';
+//   }
+
+//   // Progress bar: 100% if progress >= requirement, else proportional
+//   const progressBarPercent = (mission.Progress >= mission.Requirement && mission.Requirement > 0) || mission.Claimed
+//     ? 100
+//     : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+
+//   const groupCompleted = isGroupCompleted(mission);
+
+//   let card = document.createElement('div');
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title}
+//           ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+//         </div>
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+//       <div class="progress-bar" style="margin: 10px 0;">
+//         <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+//       </div>
+//     ` : ''}
+//     <div class="mission-footer">
+//       <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
+//       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+//     </div>
+//     ${renderChildMissions(mission.Children, idx)}
+//   `;
+
+//   missionsContainer.appendChild(card);
+// });
+
+-->

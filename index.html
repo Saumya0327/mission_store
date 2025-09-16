@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Missions</title>
+  <style>
+    /* Background gradient like screenshot */
+/* Background */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  /* background: linear-gradient(180deg, #5e2dd8 0%, #3a1a9a 40%, #f5e9dc 100%); */
+  color: #fff;
+  line-height: 1.4;
+}
+
+/* App container */
+.app-container {
+  max-width:--webkit-fill-available;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* Title */
+.title {
+  font-size: clamp(28px, 5vw, 44px);
+  height: fit-content;
+  margin: 0 0 4px;
+  font-weight: 900;
+  color: #ffcc00;
+  background-color: #3a1a9a;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.55);
+  text-align: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+.tab-btn {
+  flex: 1 1 auto;
+  max-width: 180px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #2b1f6a;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+  font-weight: 600;
+  color: #ddd;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.tab-btn:hover { transform: translateY(-2px); }
+.tab-btn.active {
+  background: linear-gradient(180deg, #6f3bff 0%, #3b1fb2 100%);
+  border: 2px solid #ffcc00;
+  color: #fff;
+  font-weight: 800;
+}
+
+/* Filter section */
+.filter-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.filter-dropdown {
+  position: relative; /* Add this */
+}
+.filter-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #2b1f6a;
+  border: 1px solid rgba(255,255,255,.12);
+  color: #eee;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.3s ease;
+}
+
+.filter-btn.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+.filter-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 2px;
+  border-radius: 10px;
+  padding: 6px;
+  background: #1c1547;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Add shadow */
+}
+.filter-option {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.filter-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.filter-option.active {
+  background: rgba(255,204,0,.16);
+  color: #ffcc00;
+}
+
+/* Missions Grid */
+.missions-container {
+  display: grid;
+  gap: 20px;
+}
+@media (min-width: 600px) {
+  .missions-container { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 992px) {
+  .missions-container { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Mission card */
+.mission-card {
+  background: linear-gradient(180deg,#3a1a9a 0%, #26125f 100%);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,.5);
+  border: 1px solid rgba(255,255,255,.08);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform .25s ease;
+}
+.mission-card:hover { transform: translateY(-4px); }
+
+/* Group missions accent */
+.group-mission {
+  border-left: 5px solid #ffcc00;
+  padding-left: 16px;
+}
+
+/* Header */
+.mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.mission-title {
+  font-size: clamp(16px, 2vw, 18px);
+  font-weight: 800;
+  color: #ffd54a;
+}
+.mission-subtitle {
+  margin-top: 4px;
+  font-size: clamp(12px, 1.8vw, 14px);
+  color: #cfd6e3;
+}
+
+/* Rewards */
+.reward-img {
+  width: 28px;
+  height: 28px;
+  margin-right: 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.35);
+}
+.multiple-rewards-btn {
+  padding: 4px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #ffcc00;
+  color: #ffcc00;
+  background: rgba(255,204,0,.08);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #1b1b2e;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9f1c 0%, #ffa800 100%);
+}
+
+/* Child missions */
+.child-missions {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+.child-mission {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.05);
+  border-left: 3px solid #1e90ff;
+}
+
+/* Footer */
+.mission-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: clamp(12px, 1.6vw, 14px);
+}
+.expiry { color: #ff6b6b; }
+
+/* Buttons */
+.btn {
+  /* min-height: 40px; */
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+.btn.go { background: #2ecc71; }
+.btn.claim { background: #ffcc00; color: #000; }
+.btn.completed { background: #6c757d; }
+.btn.expired { background: #dc3545; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(6,19,38,0.86);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  padding: 16px;
+}
+.reward-modal {
+  max-width: 420px;
+  width: 100%;
+  padding: 24px 18px;
+  border-radius: 16px;
+  background: #1a1f3e;
+  box-shadow: 0 12px 28px rgba(0,0,0,.5);
+  color: #fff;
+}
+.reward-modal-title {
+  font-size: 20px;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.reward-modal-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+}
+.reward-modal-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+/* Extra small screen tweaks */
+@media (max-width: 480px) {
+  .title { margin-bottom: 16px; }
+  .mission-card { padding: 16px; }
+  .tabs { gap: 8px; }
+  .tab-btn { font-size: 14px; padding: 8px 10px; }
+  .missions-container { gap: 14px; }
+}
+
+
+  </style>
+
+</head>
+<body>
+  <div class="full">
+    <h1 class="title">MISSIONS</h1>
+    <div class="app-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tag="daily">Daily Missions</button>
+        <button class="tab-btn" data-tag="weekly">Weekly Missions</button>
+        <button class="tab-btn" data-tag="all">All Missions</button>
+      </div>
+      <div class="filter-section">
+        <div class="filter-dropdown">
+          <button class="filter-btn" id="filterBtn">
+            <span id="filterText">Active</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div class="filter-options" id="filterOptions" style="display: none;">
+            <div class="filter-option active" data-filter="active">Active</div>
+            <div class="filter-option" data-filter="expired">Expired</div>
+            <div class="filter-option" data-filter="locked">Locked</div>
+            <div class="filter-option" data-filter="claimed">Claimed</div>
+            <div class="filter-option" data-filter="completed">Completed</div>
+            <div class="filter-option" data-filter="all">All</div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="missionsContainer" class="missions-container">
+        <div class="loading">Loading missions...</div>
+      </div>
+    </div>
+    
+  </div>
+
+
+  <!-- Modal for multiple rewards -->
+  <div id="rewardsModal" class="modal-overlay" style="display:none;">
+    <div class="reward-modal">
+      <button class="close-modal" onclick="closeRewardsModal()">×</button>
+      <div class="reward-modal-title" id="rewardsModalTitle">Rewards</div>
+      <div class="rewards-grid" id="rewardsModalGrid"></div>
+    </div>
+  </div>
+
+  <script>
+  let missionsData = [];
+  const missionsContainer = document.getElementById("missionsContainer");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const rewardsModal = document.getElementById("rewardsModal");
+  const rewardsModalGrid = document.getElementById("rewardsModalGrid");
+  const rewardsModalTitle = document.getElementById("rewardsModalTitle");
+  // Global variable for current filter
+let currentFilter = 'active';
+
+// Dropdown toggle functionality
+function initializeDropdown() {
+  const filterBtn = document.getElementById('filterBtn');
+  const filterOptions = document.getElementById('filterOptions');
+  const filterText = document.getElementById('filterText');
+
+  // Toggle dropdown
+  filterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = filterOptions.style.display === 'block';
+    
+    if (isOpen) {
+      filterOptions.style.display = 'none';
+      filterBtn.classList.remove('open');
+    } else {
+      filterOptions.style.display = 'block';
+      filterBtn.classList.add('open');
+    }
+  });
+
+  // Handle option selection
+  document.querySelectorAll('.filter-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      const filter = e.target.dataset.filter;
+      const text = e.target.textContent;
+      
+      // Update current filter
+      currentFilter = filter;
+      filterText.textContent = text;
+      
+      // Update active state
+      document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+      e.target.classList.add('active');
+      
+      // Close dropdown
+      filterOptions.style.display = 'none';
+      filterBtn.classList.remove('open');
+      
+      // Re-render missions with new filter
+      const activeTab = document.querySelector('.tab-btn.active').dataset.tag;
+      renderMissions(activeTab);
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', () => {
+    filterOptions.style.display = 'none';
+    filterBtn.classList.remove('open');
+  });
+}
+
+
+function getMissionFilterStatus(mission) {
+  // Check if expired
+  if (mission.Expired === 1 || (mission.ExpiryDate && new Date(mission.ExpiryDate) < new Date())) {
+    return 'expired';
+  }
+  
+  // Check if locked
+  if (mission.Locked === 1) {
+    return 'locked';
+  }
+  
+  // Check if claimed
+  if (mission.Claimed === 1) {
+    return 'claimed';
+  }
+  
+  // Check if completed
+  if (mission.Completed === 1) {
+    return 'completed';
+  }
+  
+  // Otherwise active
+  return 'active';
+}
+
+
+
+  //daily progress showing code 
+  function analyzeMissionProgress(activityArray, requirement, requiredDays, consecutive) {
+  if (!Array.isArray(activityArray)) activityArray = [];
+
+  let streak = [];
+  let completed = false;
+  let claimable = false;
+
+  if (consecutive) {
+    // Find the most recent streak of requiredDays consecutive days
+    for (let i = 0; i < activityArray.length; i++) {
+      if (activityArray[i] >= requirement) {
+        streak.push(i);
+        if (streak.length === requiredDays) {
+          claimable = true;
+          break;
+        }
+      } else {
+        streak = [];
+      }
+    }
+  } else {
+    // Non-consecutive: any days with progress >= requirement
+    streak = activityArray.map((v, i) => (v >= requirement ? i : null)).filter(i => i !== null);
+    if (streak.length >= requiredDays) {
+      streak = streak.slice(0, requiredDays);
+      claimable = true;
+    }
+  }
+  completed = claimable;
+  return { streak, completed, claimable };
+}
+
+
+  function closeRewardsModal() {
+    rewardsModal.style.display = "none";
+    rewardsModalGrid.innerHTML = "";
+  }
+  function showRewardsModal(rewards) {
+  if(!rewards || rewards.length === 0) {
+    console.warn('No rewards to show in modal');
+    return;
+  }
+  console.log('Opening modal with rewards count:', rewards.length);
+  rewardsModalTitle.textContent = `Mission Rewards (${rewards.length})`;
+  rewardsModalGrid.innerHTML = rewards.map(r => `
+    <div class="reward-modal-item">
+      <img class="reward-modal-img" src="${r.RewardImage && r.RewardImage.trim() ? r.RewardImage : "https://cdn-icons-png.flaticon.com/128/9382/9382189.png"}" alt="Reward" />
+      <div>
+        <div class="reward-modal-label">${r.RewardTypeName || 'Reward'}</div>
+        <div style="color:#fff;font-size:15px;font-weight:300;">${r.Value || 0}</div>
+      </div>
+    </div>
+  `).join('');
+  rewardsModal.style.display = "flex";
+  console.log('Modal display set to flex');
+}
+
+
+  // Fetch missions from API
+  function fetchMissions() {
+    const requestData = {
+      "action": "getUserMissions",
+      "gocid": "e3ff63b0-92d1-11f0-a464-002590e818fa",
+      "appid": "20220906uXoo",
+      "data_from": "dd",
+      "requestContext": true
+    };
+
+    fetch('https://platformqa.octro.com:3443/missionconsumer/getUserMissions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(requestData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      let body = data.body;
+      if (typeof body === "string") {
+        try {
+          body = JSON.parse(body);
+        } catch(e) {
+          console.error("JSON parsing failed for body:", e, body);
+          missionsContainer.innerHTML = `<div class="error">Could not parse API response.</div>`;
+          return;
+        }
+      }
+      if (body && body.resp && Array.isArray(body.resp.msg)) {
+        missionsData = body.resp.msg;
+        renderMissions(document.querySelector(".tab-btn.active").dataset.tag || "daily");
+      } else {
+        missionsContainer.innerHTML = `
+          <div class="error">
+            <h3>Unexpected response structure</h3>
+            <details>
+              <summary>Click to see response structure</summary>
+              <pre style="background: #333; padding: 10px; border-radius: 4px; overflow: auto; max-height: 300px;">
+${JSON.stringify(data, null, 2)}
+              </pre>
+            </details>
+          </div>`;
+        console.log("BODY for debug:", body);
+      }
+    })
+    .catch(error => {
+      console.error('Full Error Details:', error);
+      missionsContainer.innerHTML = `
+        <div class="error">
+          <h3>Error loading missions</h3>
+          <p><strong>Error:</strong> ${error.message}</p>
+          <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+            <li>Possible CORS policy, endpoint, network, or data format issues.</li>
+          </ul>
+          <button onclick="fetchMissions()" style="margin-top: 10px; padding: 8px 16px; background: #1e90ff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Retry
+          </button>
+        </div>`;
+    });
+  }
+  function getRewardDisplay(rewards, missionIndex) {
+    if (!rewards || rewards.length === 0) {
+      return `<div class="reward">No Rewards</div>`;
+    }
+    if (rewards.length === 1) {
+      const r = rewards[0];
+      return `<div class="reward">
+        <img class="reward-img" src="${r.RewardImage && r.RewardImage.trim() ? r.RewardImage : "https://cdn-icons-png.flaticon.com/128/9382/9382189.png"}" alt="Reward" />
+        ${r.Value || 0} ${r.RewardTypeName || 'Points'}
+      </div>`;
+    }
+    // Multiple rewards: clickable button with data attribute for mission index
+    return `
+      <button class="multiple-rewards-btn" type="button" data-mission-idx="${missionIndex}">
+        💰 Multiple Rewards (${rewards.length})
+      </button>
+    `;
+  }
+
+  function getMissionStatus(mission) {
+  if (mission.Requirement > 0) {
+    if (mission.Claimed === 1) return 'completed';
+    if (mission.Progress >= mission.Requirement) return 'claim';
+    return 'go';
+  }
+  return null;
+  }
+
+// function isGroupCompleted(mission) {
+//   if (!mission.Children || !Array.isArray(mission.Children) || mission.Children.length === 0) return false;
+//   return mission.Children.every(child => child.Claimed === 1 || child.Completed === 1 || (child.Progress >= child.Requirement && child.Requirement > 0));
+// }
+
+//2nd change in group completed or not
+// function isGroupCompleted(mission) {
+//   if (!mission.Children || !Array.isArray(mission.Children) || mission.Children.length === 0) return false;
+
+//   // All child missions must be marked completed, regardless of claim status
+//   return mission.Children.every(child => child.Completed === 1);
+// }
+function isGroupCompleted(mission) {
+  return mission.Completed === 1;
+}
+
+
+
+  function formatExpiry(hideTime) { 
+    if (!hideTime) return 'No expiry';
+    try {
+      const expiryDate = new Date(hideTime);
+      const now = new Date();
+      const diff = expiryDate - now;
+
+      if (diff <= 0) return 'Expired';
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+      if (days > 0) return `${days} days`;
+      return `${hours}h remaining`;
+    } catch (e) {
+      return 'Invalid date';
+    }
+  }
+
+function renderChildMissions(children, parentIdx) {
+  if (!children || children.length === 0) return '';
+
+  return `<div class="child-missions">${children.map((child, idx) => {
+    let status = 'go';
+    let statusText = 'Go';
+    
+    // Check BOTH conditions for child missions
+    const progressMet = child.Progress >= child.Requirement && child.Requirement > 0;
+    const daysMet = child.ProgressDays >= child.RequiredDays && child.RequiredDays > 0;
+    const bothConditionsMet = progressMet && daysMet;
+    
+    if (bothConditionsMet) {
+      status = 'claim';
+      statusText = 'Claim';
+    }
+    if (child.Claimed) {
+      status = 'completed';
+      statusText = 'Completed';
+    }
+
+    // Progress bars: 100% only if BOTH conditions met
+    const progressBarPercent = bothConditionsMet || child.Claimed
+      ? 100
+      : Math.min(child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0, 100);
+      
+    const daysBarPercent = bothConditionsMet || child.Claimed
+      ? 100
+      : Math.min(child.RequiredDays > 0 ? (child.ProgressDays / child.RequiredDays) * 100 : 0, 100);
+
+    return `<div class="child-mission">
+      <div class="mission-header">
+        <div>
+          <div class="mission-title">${child.Title}</div>
+          <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
+        </div>
+        ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
+      </div>
+      ${child.Requirement > 0 ? `
+        
+        <div style="display: flex; gap: 10px; margin: 5px 0;">
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${child.Progress}/${child.Requirement}
+          </div>
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${child.ProgressDays}/${child.RequiredDays} Days
+          </div>
+        </div>
+      ` : ''}
+      <div class="mission-footer">
+        <span class="expiry">${child.ExpiryDate ? 'Expires: ' + child.ExpiryDate : ''}</span>
+        ${
+          status === 'go'
+            ? (child.Deeplink
+                ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
+                : `<button class="btn go" disabled>Go</button>`)
+            : `<button class="btn ${status}">${statusText}</button>`
+        }
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+
+  function renderMissions(tag) {
+    if (!missionsData || missionsData.length === 0) {
+      missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
+      return;
+    }
+    missionsContainer.innerHTML = "";
+    let filtered = missionsData;
+    if (tag !== "all") {
+      filtered = missionsData.filter(m => {
+        const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
+        return missionTag === tag;
+      });
+    }
+
+    // Filter by status (active, expired, locked, claimed, completed)
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(mission => {
+      const status = getMissionFilterStatus(mission);
+      return status === currentFilter;
+    });
+  }
+
+    if (filtered.length === 0) {
+      missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
+      return;
+    }
+ 
+filtered.forEach((mission, idx) => {
+  let status = 'go';
+  let statusText = 'Go';
+  
+  // Check BOTH conditions: progress AND progressDays
+  const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
+  const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
+  const bothConditionsMet = progressMet && daysMet;
+  
+  if (bothConditionsMet) {
+    status = 'claim';
+    statusText = 'Claim';
+  }
+  if (mission.Claimed) {
+    status = 'completed';
+    statusText = 'Completed';
+  }
+
+  // Progress bars: 100% only if BOTH conditions met
+  const progressBarPercent = bothConditionsMet || mission.Claimed
+    ? 100
+    : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+    
+  const daysBarPercent = bothConditionsMet || mission.Claimed
+    ? 100
+    : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
+
+  const groupCompleted = isGroupCompleted(mission);
+
+  let card = document.createElement('div');
+  card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  
+  card.innerHTML = `
+    <div class="mission-header">
+      <div>
+        <div class="mission-title">${mission.Title}
+          ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+        </div>
+      </div>
+      ${getRewardDisplay(mission.MissionReward, idx)}
+    </div>
+    ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+      <div class="progress-bar" style="margin: 10px 0;">
+        <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+      </div>
+      <div style="display: flex; gap: 10px; margin: 5px 0;">
+        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+          ${mission.Progress}/${mission.Requirement}
+        </div>
+        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+          ${mission.ProgressDays}/${mission.RequiredDays} Days
+        </div>
+      </div>
+    ` : ''}
+    <div class="mission-footer">
+      <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
+      ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+    </div>
+    ${renderChildMissions(mission.Children, idx)}
+  `;
+
+  missionsContainer.appendChild(card);
+});
+
+
+}
+
+
+function attachRewardButtonListeners() {
+  // Use event delegation on the missions container
+  missionsContainer.addEventListener('click', function(e) {
+    if (e.target.classList.contains('multiple-rewards-btn')) {
+      const idx = e.target.getAttribute('data-mission-idx');
+      
+      if (idx.includes('-')) {
+        // Child mission rewards
+        const [parentIdx, childIdx] = idx.split('-').map(Number);
+        
+        // Find the actual mission in the original data
+        const parentMission = missionsData.find((mission, index) => index === parentIdx);
+        if (parentMission && parentMission.Children && parentMission.Children[childIdx]) {
+          showRewardsModal(parentMission.Children[childIdx].MissionReward || []);
+        } else {
+          console.warn('Child mission not found for indices:', parentIdx, childIdx);
+        }
+      } else {
+        // Parent mission rewards
+        const parentIndex = Number(idx);
+        const parentMission = missionsData.find((mission, index) => index === parentIndex);
+        
+        if (parentMission && parentMission.MissionReward) {
+          showRewardsModal(parentMission.MissionReward);
+        } else {
+          console.warn('Parent mission not found for index:', parentIndex);
+        }
+      }
+    }
+  });
+}
+
+
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelector(".tab-btn.active").classList.remove("active");
+      btn.classList.add("active");
+      renderMissions(btn.dataset.tag);
+    });
+  });
+  
+
+
+  // Close modal on Escape key press and clicking outside modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") closeRewardsModal();
+  });
+  rewardsModal.addEventListener('click', e => {
+    if (e.target === rewardsModal) closeRewardsModal();
+  });
+
+//
+// Add this after all your functions, before the initialization
+missionsContainer.addEventListener('click', function(e) {
+  if (e.target.classList.contains('multiple-rewards-btn')) {
+    const idx = e.target.getAttribute('data-mission-idx');
+    
+    if (idx.includes('-')) {
+      // Child mission
+      const [parentIdx, childIdx] = idx.split('-').map(Number);
+      
+      // Find in the currently displayed filtered missions
+      const displayedMissions = Array.from(document.querySelectorAll('.mission-card'));
+      const parentCard = displayedMissions[parentIdx];
+      
+      if (parentCard) {
+        // Get the actual mission from missionsData by finding the title
+        const titleElement = parentCard.querySelector('.mission-title');
+        const missionTitle = titleElement.textContent.replace('Completed', '').trim();
+        
+        const actualMission = missionsData.find(m => m.Title === missionTitle);
+        if (actualMission && actualMission.Children && actualMission.Children[childIdx]) {
+          showRewardsModal(actualMission.Children[childIdx].MissionReward || []);
+        }
+      }
+    } else {
+      // Parent mission
+      const parentIdx = Number(idx);
+      const displayedMissions = Array.from(document.querySelectorAll('.mission-card'));
+      const parentCard = displayedMissions[parentIdx];
+      
+      if (parentCard) {
+        const titleElement = parentCard.querySelector('.mission-title');
+        const missionTitle = titleElement.textContent.replace('Completed', '').trim();
+        
+        const actualMission = missionsData.find(m => m.Title === missionTitle);
+        if (actualMission && actualMission.MissionReward) {
+          showRewardsModal(actualMission.MissionReward);
+        }
+      }
+    }
+  }
+});
+
+
+  // Initialize
+  fetchMissions();
+  // Initialize dropdown after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  initializeDropdown();
+  attachRewardButtonListeners(); // Add this line
+});
+
+// // Also initialize after missions are fetched
+// fetchMissions().then(() => {
+//   initializeDropdown();
+// });
+
+</script>
+</body>
+</html>
