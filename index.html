@@ -606,24 +606,53 @@ ${JSON.stringify(data, null, 2)}
 function isGroupCompleted(mission) {
   return mission.Completed === 1;
 }
-function formatExpiry(hideTime) { 
-    if (!hideTime) return 'No expiry';
-    try {
-      const expiryDate = new Date(hideTime);
-      const now = new Date();
-      const diff = expiryDate - now;
 
-      if (diff <= 0) return 'Expired';
+function formatExpiry(hideTime) {
+  if (!hideTime) return 'No expiry';
+  try {
+    const expiryDate = new Date(hideTime);
+    const now = new Date();
+    const diff = expiryDate - now;
 
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (diff <= 0) return 'Expired';
 
-      if (days > 0) return `${days} days`;
-      return `${hours}h remaining`;
-    } catch (e) {
-      return 'Invalid date';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (days > 0) {
+      return `${days}d ${hours}h`;
+    } else {
+      // Less than 1 day - show countdown timer in format HH:MM:SS
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+      const ss = String(seconds).padStart(2, '0');
+      return `${hh}h:${mm}m:${ss}s`;
     }
+  } catch (e) {
+    return 'Invalid date';
   }
+}
+
+// Start countdown timer on given DOM element, updates every second
+function startExpiryCountdown(hideTime, domElement) {
+  if (!domElement) return null;
+
+    function update() {
+        const text = formatExpiry(hideTime);
+        if(text === 'Expired') {
+        domElement.textContent = 'Expired';
+        clearInterval(intervalId);
+        } else {
+        domElement.textContent = 'Expires: ' + text; // Prefix here
+        }
+    }
+
+  update(); // Show instantly
+  const intervalId = setInterval(update, 1000);
+  return intervalId;
+}
 
 function renderChildMissions(children, parentIdx) {
   if (!children || children.length === 0) return '';
@@ -648,6 +677,8 @@ function renderChildMissions(children, parentIdx) {
       ? Math.min((child.ProgressDays / child.RequiredDays) * 100, 100)
       : 0;
 
+    const expiryId = `expiry-${child.UserMissionTemplateID}`;
+
     return `<div class="child-mission">
       <div class="mission-header">
         <div>
@@ -668,7 +699,7 @@ function renderChildMissions(children, parentIdx) {
         </div>
       ` : ''}
       <div class="mission-footer">
-        <span class="expiry">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate ) : ''}</span>
+        <span class="expiry" id="${expiryId}">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate) : ''}</span>
         ${
           status === 'go'
             ? (child.Deeplink
@@ -681,21 +712,31 @@ function renderChildMissions(children, parentIdx) {
   }).join('')}</div>`;
 }
 
-function renderMissions(tag) {
-  if (!missionsData || missionsData.length === 0) {
-    missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
-    return;
-  }
-  missionsContainer.innerHTML = "";
-  let filtered = missionsData;
-  if (tag !== "all") {
-    filtered = missionsData.filter(m => {
-      const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
-      return missionTag === tag;
-    });
-  }
+// Call this after rendering children missions HTML into DOM
+function initializeExpiryTimers(children) {
+  children.forEach(child => {
+    const expiryElem = document.getElementById(`expiry-${child.UserMissionTemplateID}`);
+    if (expiryElem && child.ExpiryDate) {
+      startExpiryCountdown(child.ExpiryDate, expiryElem);
+    }
+  });
+}
 
-  // Filter by status (active, expired, locked, claimed, completed)
+function renderMissions(tag) {
+    if (!missionsData || missionsData.length === 0) {
+      missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
+      return;
+    }
+    missionsContainer.innerHTML = "";
+    let filtered = missionsData;
+    if (tag !== "all") {
+      filtered = missionsData.filter(m => {
+        const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
+        return missionTag === tag;
+      });
+    }
+
+    // Filter by status (active, expired, locked, claimed, completed)
   if (currentFilter !== 'all') {
     filtered = filtered.filter(mission => {
       const status = getMissionFilterStatus(mission);
@@ -703,67 +744,84 @@ function renderMissions(tag) {
     });
   }
 
-  if (filtered.length === 0) {
-    missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
-    return;
-  }
- 
-  filtered.forEach((mission, idx) => {
-    let status = 'go';
-    let statusText = 'Go';
-
-    // --- Simple claim logic: only claim if completed=1 and claimed=0 ---
-    if (mission.Completed == 1 && mission.Claimed == 0) {
-      status = 'claim';
-      statusText = 'Claim';
-    } else if (mission.Claimed == 1) {
-      status = 'completed';
-      statusText = 'Completed';
+    if (filtered.length === 0) {
+      missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
+      return;
     }
 
-    // Progress bars (leave as before)
-    const progressBarPercent = mission.Requirement > 0
-      ? Math.min((mission.Progress / mission.Requirement) * 100, 100)
-      : 0;
-    const daysBarPercent = mission.RequiredDays > 0
-      ? Math.min((mission.ProgressDays / mission.RequiredDays) * 100, 100)
-      : 0;
+filtered.forEach((mission, idx) => {
+  let status = 'go';
+  let statusText = 'Go';
 
-    const groupCompleted = isGroupCompleted(mission);
+  // Check BOTH conditions: progress AND progressDays
+  const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
+  const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
+  const bothConditionsMet = progressMet && daysMet;
 
-    let card = document.createElement('div');
-    card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  if (mission.Claimed==0 && mission.Completed==1) {
+    status = 'claim';
+    statusText = 'claim';
+  }
+  if (mission.Claimed) {
+    status = 'completed';
+    statusText = 'completed';
+  }
 
-    card.innerHTML = `
-      <div class="mission-header">
-        <div>
-          <div class="mission-title">${mission.Title}
-            ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
-          </div>
+  // Progress bars: 100% only if BOTH conditions met
+  const progressBarPercent = bothConditionsMet || mission.Claimed
+    ? 100
+    : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+
+  const daysBarPercent = bothConditionsMet || mission.Claimed
+    ? 100
+    : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
+
+  const groupCompleted = isGroupCompleted(mission);
+
+  let card = document.createElement('div');
+  card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+  const childrenHTML = renderChildMissions(mission.Children, idx);
+
+
+  card.innerHTML = `
+    <div class="mission-header">
+      <div>
+        <div class="mission-title">${mission.Title}
+          ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
         </div>
-        ${getRewardDisplay(mission.MissionReward, idx)}
       </div>
-      ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
-        <div class="progress-bar" style="margin: 10px 0;">
-          <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
-        </div>
-        <div style="display: flex; gap: 10px; margin: 5px 0;">
-          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-            ${mission.Progress}/${mission.Requirement}
-          </div>
-          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-            ${mission.ProgressDays}/${mission.RequiredDays} Days
-          </div>
-        </div>
-      ` : ''}
-      <div class="mission-footer">
-        ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+      ${getRewardDisplay(mission.MissionReward, idx)}
+    </div>
+    ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+      <div class="progress-bar" style="margin: 10px 0;">
+        <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
       </div>
-      ${renderChildMissions(mission.Children, idx)}
-    `;
+      <div style="display: flex; gap: 10px; margin: 5px 0;">
+        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+          ${mission.Progress}/${mission.Requirement}
+        </div>
+        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+          ${mission.ProgressDays}/${mission.RequiredDays} Days
+        </div>
+      </div>
+    ` : ''}
+    <div class="mission-footer">
+      ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+    </div>
+    <div class="children-container"></div>
+    
+  `;
 
-    missionsContainer.appendChild(card);
-  });
+  missionsContainer.appendChild(card);
+  const childrenContainer = card.querySelector('.children-container');
+  if (childrenContainer) {
+    childrenContainer.innerHTML = childrenHTML;
+
+    // Start live expiry timers on children
+    initializeExpiryTimers(mission.Children);
+  }
+});
+
 }
 function attachRewardButtonListeners() {
   // Use event delegation on the missions container
