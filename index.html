@@ -580,7 +580,7 @@ ${JSON.stringify(data, null, 2)}
   function getMissionStatus(mission) {
   if (mission.Requirement > 0) {
     if (mission.Claimed === 1) return 'completed';
-    if (mission.Progress >= mission.Requirement) return 'claim';
+    if (mission.Completed==1 && mission.Claimed==0) return 'claim';
     return 'go';
   }
   return null;
@@ -601,10 +601,7 @@ ${JSON.stringify(data, null, 2)}
 function isGroupCompleted(mission) {
   return mission.Completed === 1;
 }
-
-
-
-  function formatExpiry(hideTime) { 
+function formatExpiry(hideTime) { 
     if (!hideTime) return 'No expiry';
     try {
       const expiryDate = new Date(hideTime);
@@ -629,29 +626,22 @@ function renderChildMissions(children, parentIdx) {
   return `<div class="child-missions">${children.map((child, idx) => {
     let status = 'go';
     let statusText = 'Go';
-    
-    // Check BOTH conditions for child missions
-    const progressMet = child.Progress >= child.Requirement && child.Requirement > 0;
-    const daysMet = child.ProgressDays >= child.RequiredDays && child.RequiredDays > 0;
-    const bothConditionsMet = progressMet && daysMet;
-    
-    if (bothConditionsMet) {
+
+    // Simple claim logic: only claim if completed=1 and claimed=0
+    if (child.Completed == 1 && child.Claimed == 0) {
       status = 'claim';
       statusText = 'Claim';
-    }
-    if (child.Claimed) {
+    } else if (child.Claimed == 1) {
       status = 'completed';
       statusText = 'Completed';
     }
 
-    // Progress bars: 100% only if BOTH conditions met
-    const progressBarPercent = bothConditionsMet || child.Claimed
-      ? 100
-      : Math.min(child.Requirement > 0 ? (child.Progress / child.Requirement) * 100 : 0, 100);
-      
-    const daysBarPercent = bothConditionsMet || child.Claimed
-      ? 100
-      : Math.min(child.RequiredDays > 0 ? (child.ProgressDays / child.RequiredDays) * 100 : 0, 100);
+    const progressBarPercent = child.Requirement > 0
+      ? Math.min((child.Progress / child.Requirement) * 100, 100)
+      : 0;
+    const daysBarPercent = child.RequiredDays > 0
+      ? Math.min((child.ProgressDays / child.RequiredDays) * 100, 100)
+      : 0;
 
     return `<div class="child-mission">
       <div class="mission-header">
@@ -662,7 +652,9 @@ function renderChildMissions(children, parentIdx) {
         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
       </div>
       ${child.Requirement > 0 ? `
-        
+        <div class="progress-bar" style="margin: 6px 0;">
+          <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+        </div>
         <div style="display: flex; gap: 10px; margin: 5px 0;">
           <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
             ${child.Progress}/${child.Requirement}
@@ -673,7 +665,7 @@ function renderChildMissions(children, parentIdx) {
         </div>
       ` : ''}
       <div class="mission-footer">
-        <span class="expiry">${child.ExpiryDate ? 'Expires: ' + child.ExpiryDate : ''}</span>
+        <span class="expiry">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate ) : ''}</span>
         ${
           status === 'go'
             ? (child.Deeplink
@@ -686,22 +678,21 @@ function renderChildMissions(children, parentIdx) {
   }).join('')}</div>`;
 }
 
+function renderMissions(tag) {
+  if (!missionsData || missionsData.length === 0) {
+    missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
+    return;
+  }
+  missionsContainer.innerHTML = "";
+  let filtered = missionsData;
+  if (tag !== "all") {
+    filtered = missionsData.filter(m => {
+      const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
+      return missionTag === tag;
+    });
+  }
 
-  function renderMissions(tag) {
-    if (!missionsData || missionsData.length === 0) {
-      missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
-      return;
-    }
-    missionsContainer.innerHTML = "";
-    let filtered = missionsData;
-    if (tag !== "all") {
-      filtered = missionsData.filter(m => {
-        const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
-        return missionTag === tag;
-      });
-    }
-
-    // Filter by status (active, expired, locked, claimed, completed)
+  // Filter by status (active, expired, locked, claimed, completed)
   if (currentFilter !== 'all') {
     filtered = filtered.filter(mission => {
       const status = getMissionFilterStatus(mission);
@@ -709,77 +700,69 @@ function renderChildMissions(children, parentIdx) {
     });
   }
 
-    if (filtered.length === 0) {
-      missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
-      return;
-    }
+  if (filtered.length === 0) {
+    missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
+    return;
+  }
  
-filtered.forEach((mission, idx) => {
-  let status = 'go';
-  let statusText = 'Go';
-  
-  // Check BOTH conditions: progress AND progressDays
-  const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
-  const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
-  const bothConditionsMet = progressMet && daysMet;
-  
-  if (bothConditionsMet) {
-    status = 'claim';
-    statusText = 'Claim';
-  }
-  if (mission.Claimed) {
-    status = 'completed';
-    statusText = 'Completed';
-  }
+  filtered.forEach((mission, idx) => {
+    let status = 'go';
+    let statusText = 'Go';
 
-  // Progress bars: 100% only if BOTH conditions met
-  const progressBarPercent = bothConditionsMet || mission.Claimed
-    ? 100
-    : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
-    
-  const daysBarPercent = bothConditionsMet || mission.Claimed
-    ? 100
-    : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
+    // --- Simple claim logic: only claim if completed=1 and claimed=0 ---
+    if (mission.Completed == 1 && mission.Claimed == 0) {
+      status = 'claim';
+      statusText = 'Claim';
+    } else if (mission.Claimed == 1) {
+      status = 'completed';
+      statusText = 'Completed';
+    }
 
-  const groupCompleted = isGroupCompleted(mission);
+    // Progress bars (leave as before)
+    const progressBarPercent = mission.Requirement > 0
+      ? Math.min((mission.Progress / mission.Requirement) * 100, 100)
+      : 0;
+    const daysBarPercent = mission.RequiredDays > 0
+      ? Math.min((mission.ProgressDays / mission.RequiredDays) * 100, 100)
+      : 0;
 
-  let card = document.createElement('div');
-  card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
-  
-  card.innerHTML = `
-    <div class="mission-header">
-      <div>
-        <div class="mission-title">${mission.Title}
-          ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+    const groupCompleted = isGroupCompleted(mission);
+
+    let card = document.createElement('div');
+    card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+
+    card.innerHTML = `
+      <div class="mission-header">
+        <div>
+          <div class="mission-title">${mission.Title}
+            ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+          </div>
         </div>
+        ${getRewardDisplay(mission.MissionReward, idx)}
       </div>
-      ${getRewardDisplay(mission.MissionReward, idx)}
-    </div>
-    ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
-      <div class="progress-bar" style="margin: 10px 0;">
-        <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
-      </div>
-      <div style="display: flex; gap: 10px; margin: 5px 0;">
-        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-          ${mission.Progress}/${mission.Requirement}
+      ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+        <div class="progress-bar" style="margin: 10px 0;">
+          <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
         </div>
-        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-          ${mission.ProgressDays}/${mission.RequiredDays} Days
+        <div style="display: flex; gap: 10px; margin: 5px 0;">
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${mission.Progress}/${mission.Requirement}
+          </div>
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${mission.ProgressDays}/${mission.RequiredDays} Days
+          </div>
         </div>
+      ` : ''}
+      <div class="mission-footer">
+        ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
       </div>
-    ` : ''}
-    <div class="mission-footer">
-      <span class="expiry">${mission.ExpiryDate ? 'Expires: ' + mission.ExpiryDate : ''}</span>
-      ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
-    </div>
-    ${renderChildMissions(mission.Children, idx)}
-  `;
+      ${renderChildMissions(mission.Children, idx)}
+    `;
 
-  missionsContainer.appendChild(card);
-});
-
-
+    missionsContainer.appendChild(card);
+  });
 }
+
 
 
 function attachRewardButtonListeners() {
@@ -810,7 +793,7 @@ function attachRewardButtonListeners() {
           console.warn('Parent mission not found for index:', parentIndex);
         }
       }
-    }
+    } 
   });
 }
 
@@ -886,10 +869,6 @@ document.addEventListener('DOMContentLoaded', () => {
   attachRewardButtonListeners(); // Add this line
 });
 
-// // Also initialize after missions are fetched
-// fetchMissions().then(() => {
-//   initializeDropdown();
-// });
 
 </script>
 </body>
