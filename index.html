@@ -132,6 +132,11 @@ body {
 @media (min-width: 600px) {
   .missions-container { grid-template-columns: repeat(2, 1fr); }
 }
+@media (max-width :768px){
+  .missions-container{
+    grid-template-columns: repeat(1,1fr);
+  }
+}
 @media (min-width: 992px) {
   .missions-container { grid-template-columns: repeat(2, 1fr); }
 }
@@ -564,9 +569,9 @@ ${JSON.stringify(data, null, 2)}
     }
     if (rewards.length === 1) {
       const r = rewards[0];
-      return `<div class="reward">
+      return `<div class="reward" style="display:flex;">
         <img class="reward-img" src="${r.RewardImage && r.RewardImage.trim() ? r.RewardImage : "https://cdn-icons-png.flaticon.com/128/9382/9382189.png"}" alt="Reward" />
-        ${r.Value || 0} ${'Points'}
+        <p style="margin-top:5px">${r.Value || 0}</p>
       </div>`;
     }
     // Multiple rewards: clickable button with data attribute for mission index
@@ -652,9 +657,7 @@ function renderChildMissions(children, parentIdx) {
         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
       </div>
       ${child.Requirement > 0 ? `
-        <div class="progress-bar" style="margin: 6px 0;">
-          <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
-        </div>
+        
         <div style="display: flex; gap: 10px; margin: 5px 0;">
           <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
             ${child.Progress}/${child.Requirement}
@@ -762,9 +765,6 @@ function renderMissions(tag) {
     missionsContainer.appendChild(card);
   });
 }
-
-
-
 function attachRewardButtonListeners() {
   // Use event delegation on the missions container
   missionsContainer.addEventListener('click', function(e) {
