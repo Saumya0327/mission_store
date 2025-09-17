@@ -495,7 +495,7 @@ function getMissionFilterStatus(mission) {
   function fetchMissions() {
     const requestData = {
       "action": "getUserMissions",
-      "gocid": "e3ff63b0-92d1-11f0-a464-002590e818fa",
+      "gocid": "c0e5f6e7-e46c-11ef-a92b-002590e818fa",
       "appid": "20220906uXoo",
       "data_from": "dd",
       "requestContext": true
@@ -566,7 +566,7 @@ ${JSON.stringify(data, null, 2)}
       const r = rewards[0];
       return `<div class="reward">
         <img class="reward-img" src="${r.RewardImage && r.RewardImage.trim() ? r.RewardImage : "https://cdn-icons-png.flaticon.com/128/9382/9382189.png"}" alt="Reward" />
-        ${r.Value || 0} ${r.RewardTypeName || 'Points'}
+        ${r.Value || 0} ${'Points'}
       </div>`;
     }
     // Multiple rewards: clickable button with data attribute for mission index
