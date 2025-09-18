@@ -699,7 +699,6 @@ function renderChildMissions(children, parentIdx) {
       status = 'completed';
       statusText = 'Completed';
     }
-
     const progressBarPercent = child.Requirement > 0
       ? Math.min((child.Progress / child.Requirement) * 100, 100)
       : 0;
