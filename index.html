@@ -56,7 +56,7 @@ body {
   cursor: pointer;
   transition: all 0.25s ease;
 }
-.tab-btn:hover { transform: translateY(-2px); }
+/* .tab-btn:hover { transform: translateY(-2px); } */
 .tab-btn.active {
   background: linear-gradient(180deg, #6f3bff 0%, #3b1fb2 100%);
   border: 2px solid #ffcc00;
@@ -132,7 +132,7 @@ body {
 @media (min-width: 600px) {
   .missions-container { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-width :768px){
+@media (max-width :991px){
   .missions-container{
     grid-template-columns: repeat(1,1fr);
   }
@@ -154,7 +154,7 @@ body {
   justify-content: space-between;
   transition: transform .25s ease;
 }
-.mission-card:hover { transform: translateY(-4px); }
+/* .mission-card:hover { transform: translateY(-4px); } */
 
 /* Group missions accent */
 .group-mission {
@@ -501,6 +501,7 @@ function getMissionFilterStatus(mission) {
     const requestData = {
       "action": "getUserMissions",
       "gocid": "c0e5f6e7-e46c-11ef-a92b-002590e818fa",
+      // "gocid": "2a8efa40-c1a7-11ef-a92b-002590e818fa",
       "appid": "20220906uXoo",
       "data_from": "dd",
       "requestContext": true
@@ -639,6 +640,7 @@ function formatExpiry(hideTime) {
 function startExpiryCountdown(hideTime, domElement) {
   if (!domElement) return null;
 
+  let intervalId=null;
     function update() {
         const text = formatExpiry(hideTime);
         if(text === 'Expired') {
@@ -650,7 +652,7 @@ function startExpiryCountdown(hideTime, domElement) {
     }
 
   update(); // Show instantly
-  const intervalId = setInterval(update, 1000);
+  intervalId = setInterval(update, 1000);
   return intervalId;
 }
 
@@ -805,10 +807,10 @@ filtered.forEach((mission, idx) => {
         </div>
       </div>
     ` : ''}
+    <div class="children-container"></div>
     <div class="mission-footer">
       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
     </div>
-    <div class="children-container"></div>
     
   `;
 
