@@ -680,11 +680,18 @@ function startExpiryCountdown(hideTime, domElement) {
 function renderChildMissions(children, parentIdx) {
   if (!children || children.length === 0) return '';
 
-  return `<div class="child-missions">${children.map((child, idx) => {
+  // Filter children based on currentFilter
+  let displayChildren = children;
+  if (currentFilter !== 'all') {
+    displayChildren = children.filter(child => getMissionFilterStatus(child) === currentFilter);
+  }
+
+  if (displayChildren.length === 0) return ''; // No matched children, so no HTML for this group
+
+  return `<div class="child-missions">${displayChildren.map((child, idx) => {
     let status = 'go';
     let statusText = 'Go';
 
-    // Simple claim logic: only claim if completed=1 and claimed=0
     if (child.Completed == 1 && child.Claimed == 0) {
       status = 'claim';
       statusText = 'Claim';
@@ -742,6 +749,7 @@ function renderChildMissions(children, parentIdx) {
 }
 
 
+
 // Call this after rendering children missions HTML into DOM
 function initializeExpiryTimers(children) {
   children.forEach(child => {
@@ -768,11 +776,13 @@ function renderMissions(tag) {
 
   // Filter by status (active, expired, locked, claimed, completed)
   if (currentFilter !== 'all') {
-    filtered = filtered.filter(mission => {
-      const status = getMissionFilterStatus(mission);
-      return status === currentFilter;
-    });
-  }
+  filtered = missionsData.filter(mission => {
+    if (mission.Children && mission.Children.length) {
+      return mission.Children.some(child => getMissionFilterStatus(child) === currentFilter);
+    }
+    return getMissionFilterStatus(mission) === currentFilter;
+  });
+}
 
   if (filtered.length === 0) {
     missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
