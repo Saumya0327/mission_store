@@ -291,6 +291,25 @@ body {
   height: 32px;
   border-radius: 6px;
 }
+.mission-card.locked {
+  opacity: 0.65;
+  pointer-events: none;
+  filter: grayscale(30%);
+}
+.lock-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background: url('https://cdn-icons-png.flaticon.com/128/6989/6989364.png') no-repeat center center / cover;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+/* Button style for locked mission */
+.locked-btn {
+  background: #aaa;
+  color: #fff;
+  cursor: not-allowed;
+}
 
 /* Extra small screen tweaks */
 @media (max-width: 480px) {
@@ -502,6 +521,7 @@ function getMissionFilterStatus(mission) {
       "action": "getUserMissions",
       "gocid": "c0e5f6e7-e46c-11ef-a92b-002590e818fa",
       // "gocid": "2a8efa40-c1a7-11ef-a92b-002590e818fa",
+      // "gocid": "e3ff63b0-92d1-11f0-a464-002590e818fa",
       "appid": "20220906uXoo",
       "data_from": "dd",
       "requestContext": true
@@ -656,6 +676,64 @@ function startExpiryCountdown(hideTime, domElement) {
   return intervalId;
 }
 
+// function renderChildMissions(children, parentIdx) {
+//   if (!children || children.length === 0) return '';
+
+//   return `<div class="child-missions">${children.map((child, idx) => {
+//     let status = 'go';
+//     let statusText = 'Go';
+
+//     // Simple claim logic: only claim if completed=1 and claimed=0
+//     if (child.Completed == 1 && child.Claimed == 0) {
+//       status = 'claim';
+//       statusText = 'Claim';
+//     } else if (child.Claimed == 1) {
+//       status = 'completed';
+//       statusText = 'Completed';
+//     }
+
+//     const progressBarPercent = child.Requirement > 0
+//       ? Math.min((child.Progress / child.Requirement) * 100, 100)
+//       : 0;
+//     const daysBarPercent = child.RequiredDays > 0
+//       ? Math.min((child.ProgressDays / child.RequiredDays) * 100, 100)
+//       : 0;
+
+//     const expiryId = `expiry-${child.UserMissionTemplateID}`;
+
+//     return `<div class="child-mission">
+//       <div class="mission-header">
+//         <div>
+//           <div class="mission-title">${child.Title}</div>
+//           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
+//         </div>
+//         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
+//       </div>
+//       ${child.Requirement > 0 ? `
+        
+//         <div style="display: flex; gap: 10px; margin: 5px 0;">
+//           <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+//             ${child.Progress}/${child.Requirement}
+//           </div>
+//           <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+//             ${child.ProgressDays}/${child.RequiredDays} Days
+//           </div>
+//         </div>
+//       ` : ''}
+//       <div class="mission-footer">
+//         <span class="expiry" id="${expiryId}">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate) : ''}</span>
+//         ${
+//           status === 'go'
+//             ? (child.Deeplink
+//                 ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
+//                 : `<button class="btn go" disabled>Go</button>`)
+//             : `<button class="btn ${status}">${statusText}</button>`
+//         }
+//       </div>
+//     </div>`;
+//   }).join('')}</div>`;
+// }
+
 function renderChildMissions(children, parentIdx) {
   if (!children || children.length === 0) return '';
 
@@ -680,17 +758,19 @@ function renderChildMissions(children, parentIdx) {
       : 0;
 
     const expiryId = `expiry-${child.UserMissionTemplateID}`;
+    const isLocked = child.Locked === 1;
 
     return `<div class="child-mission">
       <div class="mission-header">
         <div>
-          <div class="mission-title">${child.Title}</div>
+          <div class="mission-title">${child.Title}
+            ${isLocked ? '<span class="lock-icon"></span>' : ''}
+          </div>
           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
         </div>
         ${getRewardDisplay(child.MissionReward, `${parentIdx}-${idx}`)}
       </div>
       ${child.Requirement > 0 ? `
-        
         <div style="display: flex; gap: 10px; margin: 5px 0;">
           <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
             ${child.Progress}/${child.Requirement}
@@ -703,16 +783,21 @@ function renderChildMissions(children, parentIdx) {
       <div class="mission-footer">
         <span class="expiry" id="${expiryId}">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate) : ''}</span>
         ${
-          status === 'go'
-            ? (child.Deeplink
-                ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
-                : `<button class="btn go" disabled>Go</button>`)
-            : `<button class="btn ${status}">${statusText}</button>`
+          isLocked
+            ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
+            : (
+              status === 'go'
+                ? (child.Deeplink
+                    ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
+                    : `<button class="btn go" disabled>Go</button>`)
+                : `<button class="btn ${status}">${statusText}</button>`
+            )
         }
       </div>
     </div>`;
   }).join('')}</div>`;
 }
+
 
 // Call this after rendering children missions HTML into DOM
 function initializeExpiryTimers(children) {
@@ -724,21 +809,122 @@ function initializeExpiryTimers(children) {
   });
 }
 
-function renderMissions(tag) {
-    if (!missionsData || missionsData.length === 0) {
-      missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
-      return;
-    }
-    missionsContainer.innerHTML = "";
-    let filtered = missionsData;
-    if (tag !== "all") {
-      filtered = missionsData.filter(m => {
-        const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
-        return missionTag === tag;
-      });
-    }
+// function renderMissions(tag) {
+//     if (!missionsData || missionsData.length === 0) {
+//       missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
+//       return;
+//     }
+//     missionsContainer.innerHTML = "";
+//     let filtered = missionsData;
+//     if (tag !== "all") {
+//       filtered = missionsData.filter(m => {
+//         const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
+//         return missionTag === tag;
+//       });
+//     }
 
-    // Filter by status (active, expired, locked, claimed, completed)
+//     // Filter by status (active, expired, locked, claimed, completed)
+//   if (currentFilter !== 'all') {
+//     filtered = filtered.filter(mission => {
+//       const status = getMissionFilterStatus(mission);
+//       return status === currentFilter;
+//     });
+//   }
+
+//     if (filtered.length === 0) {
+//       missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
+//       return;
+//     }
+
+// filtered.forEach((mission, idx) => {
+//   let status = 'go';
+//   let statusText = 'Go';
+
+//   // Check BOTH conditions: progress AND progressDays
+//   const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
+//   const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
+//   const bothConditionsMet = progressMet && daysMet;
+
+//   if (mission.Claimed==0 && mission.Completed==1) {
+//     status = 'claim';
+//     statusText = 'claim';
+//   }
+//   if (mission.Claimed) {
+//     status = 'completed';
+//     statusText = 'completed';
+//   }
+
+//   // Progress bars: 100% only if BOTH conditions met
+//   const progressBarPercent = bothConditionsMet || mission.Claimed
+//     ? 100
+//     : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+
+//   const daysBarPercent = bothConditionsMet || mission.Claimed
+//     ? 100
+//     : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
+
+//   const groupCompleted = isGroupCompleted(mission);
+
+//   let card = document.createElement('div');
+//   card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+//   const childrenHTML = renderChildMissions(mission.Children, idx);
+
+
+//   card.innerHTML = `
+//     <div class="mission-header">
+//       <div>
+//         <div class="mission-title">${mission.Title}
+//           ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+//         </div>
+//       </div>
+//       ${getRewardDisplay(mission.MissionReward, idx)}
+//     </div>
+//     ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+//       <div class="progress-bar" style="margin: 10px 0;">
+//         <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
+//       </div>
+//       <div style="display: flex; gap: 10px; margin: 5px 0;">
+//         <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+//           ${mission.Progress}/${mission.Requirement}
+//         </div>
+//         <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+//           ${mission.ProgressDays}/${mission.RequiredDays} Days
+//         </div>
+//       </div>
+//     ` : ''}
+//     <div class="children-container"></div>
+//     <div class="mission-footer">
+//       ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
+//     </div>
+    
+//   `;
+
+//   missionsContainer.appendChild(card);
+//   const childrenContainer = card.querySelector('.children-container');
+//   if (childrenContainer) {
+//     childrenContainer.innerHTML = childrenHTML;
+
+//     // Start live expiry timers on children
+//     initializeExpiryTimers(mission.Children);
+//   }
+// });
+
+// }
+function renderMissions(tag) {
+  if (!missionsData || missionsData.length === 0) {
+    missionsContainer.innerHTML = '<div class="loading">No missions available</div>';
+    return;
+  }
+  missionsContainer.innerHTML = "";
+  let filtered = missionsData;
+  if (tag !== "all") {
+    filtered = missionsData.filter(m => {
+      const missionTag = m.MissionTagName ? m.MissionTagName.toLowerCase() : '';
+      return missionTag === tag;
+    });
+  }
+
+  // Filter by status (active, expired, locked, claimed, completed)
   if (currentFilter !== 'all') {
     filtered = filtered.filter(mission => {
       const status = getMissionFilterStatus(mission);
@@ -746,85 +932,87 @@ function renderMissions(tag) {
     });
   }
 
-    if (filtered.length === 0) {
-      missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
-      return;
+  if (filtered.length === 0) {
+    missionsContainer.innerHTML = `<div class="loading">No ${tag} missions available</div>`;
+    return;
+  }
+
+  filtered.forEach((mission, idx) => {
+    let status = 'go';
+    let statusText = 'Go';
+
+    // Check BOTH conditions: progress AND progressDays
+    const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
+    const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
+    const bothConditionsMet = progressMet && daysMet;
+
+    if (mission.Claimed==0 && mission.Completed==1) {
+      status = 'claim';
+      statusText = 'claim';
+    }
+    if (mission.Claimed) {
+      status = 'completed';
+      statusText = 'completed';
     }
 
-filtered.forEach((mission, idx) => {
-  let status = 'go';
-  let statusText = 'Go';
+    // Progress bars: 100% only if BOTH conditions met
+    const progressBarPercent = bothConditionsMet || mission.Claimed
+      ? 100
+      : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
 
-  // Check BOTH conditions: progress AND progressDays
-  const progressMet = mission.Progress >= mission.Requirement && mission.Requirement > 0;
-  const daysMet = mission.ProgressDays >= mission.RequiredDays && mission.RequiredDays > 0;
-  const bothConditionsMet = progressMet && daysMet;
+    const daysBarPercent = bothConditionsMet || mission.Claimed
+      ? 100
+      : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
 
-  if (mission.Claimed==0 && mission.Completed==1) {
-    status = 'claim';
-    statusText = 'claim';
-  }
-  if (mission.Claimed) {
-    status = 'completed';
-    statusText = 'completed';
-  }
+    const groupCompleted = isGroupCompleted(mission);
+    const isLocked = mission.Locked === 1;
 
-  // Progress bars: 100% only if BOTH conditions met
-  const progressBarPercent = bothConditionsMet || mission.Claimed
-    ? 100
-    : Math.min(mission.Requirement > 0 ? (mission.Progress / mission.Requirement) * 100 : 0, 100);
+    let card = document.createElement('div');
+    card.className = `mission-card${isLocked ? ' locked' : ''} ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
+    const childrenHTML = renderChildMissions(mission.Children, idx);
 
-  const daysBarPercent = bothConditionsMet || mission.Claimed
-    ? 100
-    : Math.min(mission.RequiredDays > 0 ? (mission.ProgressDays / mission.RequiredDays) * 100 : 0, 100);
-
-  const groupCompleted = isGroupCompleted(mission);
-
-  let card = document.createElement('div');
-  card.className = `mission-card ${mission.MissionType === 'Group' ? 'group-mission' : ''}`;
-  const childrenHTML = renderChildMissions(mission.Children, idx);
-
-
-  card.innerHTML = `
-    <div class="mission-header">
-      <div>
-        <div class="mission-title">${mission.Title}
-          ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+    card.innerHTML = `
+      <div class="mission-header">
+        <div>
+          <div class="mission-title">${mission.Title}
+            ${isLocked ? '<span class="lock-icon"></span>' : ''}
+            ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
+          </div>
         </div>
+        ${getRewardDisplay(mission.MissionReward, idx)}
       </div>
-      ${getRewardDisplay(mission.MissionReward, idx)}
-    </div>
-    ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
-      <div class="progress-bar" style="margin: 10px 0;">
-        <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
-      </div>
-      <div style="display: flex; gap: 10px; margin: 5px 0;">
-        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-          ${mission.Progress}/${mission.Requirement}
+      ${mission.MissionType !== 'Group' && mission.Requirement > 0 ? `
+        <div class="progress-bar" style="margin: 10px 0;">
+          <div class="progress-fill" style="width:${progressBarPercent}%; background:${progressBarPercent === 100 ? '#4CAF50' : 'orange'};"></div>
         </div>
-        <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
-          ${mission.ProgressDays}/${mission.RequiredDays} Days
+        <div style="display: flex; gap: 10px; margin: 5px 0;">
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${mission.Progress}/${mission.Requirement}
+          </div>
+          <div style="flex: 1; background: #1b1b2e; border-radius: 8px; padding: 4px 8px; text-align: center; font-size: 12px;">
+            ${mission.ProgressDays}/${mission.RequiredDays} Days
+          </div>
         </div>
+      ` : ''}
+      <div class="children-container"></div>
+      <div class="mission-footer">
+        ${mission.MissionType !== 'Group' ? (
+          isLocked 
+            ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
+            : `<button class="btn ${status}">${statusText}</button>`
+        ) : ''}
       </div>
-    ` : ''}
-    <div class="children-container"></div>
-    <div class="mission-footer">
-      ${mission.MissionType !== 'Group' ? `<button class="btn ${status}">${statusText}</button>` : ''}
-    </div>
-    
-  `;
+    `;
 
-  missionsContainer.appendChild(card);
-  const childrenContainer = card.querySelector('.children-container');
-  if (childrenContainer) {
-    childrenContainer.innerHTML = childrenHTML;
-
-    // Start live expiry timers on children
-    initializeExpiryTimers(mission.Children);
-  }
-});
-
+    missionsContainer.appendChild(card);
+    const childrenContainer = card.querySelector('.children-container');
+    if (childrenContainer) {
+      childrenContainer.innerHTML = childrenHTML;
+      initializeExpiryTimers(mission.Children);
+    }
+  });
 }
+
 function attachRewardButtonListeners() {
   // Use event delegation on the missions container
   missionsContainer.addEventListener('click', function(e) {
