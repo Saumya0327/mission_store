@@ -755,6 +755,8 @@ function renderChildMissions(children, parentIdx) {
             ? (child.Deeplink
                 ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
                 : `<button class="btn go" disabled>Go</button>`)
+            : status === 'claim'
+            ? `<button class="btn claim" data-gameid="${child.GameId || child.UserMissionTemplateID}">${statusText}</button>`
             : `<button class="btn ${status}">${statusText}</button>`
         )
     )
@@ -765,6 +767,48 @@ function renderChildMissions(children, parentIdx) {
   }).join('')}</div>`;
 }
 
+document.addEventListener('click', async function(event) {
+  if (event.target.classList.contains('btn') && event.target.classList.contains('claim')) {
+    const gameId = event.target.getAttribute('data-gameid');
+    if (!gameId) {
+      alert("GameId missing, can't claim.");
+      return;
+    }
+
+    // Disable button to prevent multiple clicks
+    event.target.disabled = true;
+    event.target.textContent = "Processing...";
+
+    try {
+      const response = await fetch("https://platformqa.octro.com:3443/missionconsumer/getMissionClaimDeeplink", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action: "getMissionClaimDeeplink",
+          appid: "20220906uXoo",
+          GameId: Number(gameId),
+          data_from: "Panel"
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.statusCode === 200 && result.body && result.body.resp && result.body.resp.Status === 1 && result.body.resp.msg) {
+        window.open(result.body.resp.msg, '_blank');
+      } else {
+        alert("Claim deeplink not available.");
+      }
+    } catch (error) {
+      alert("Network or server error: " + error.message);
+    } finally {
+      // Enable button and revert text
+      event.target.disabled = false;
+      event.target.textContent = "Claim";
+    }
+  }
+});
 
 
 // Call this after rendering children missions HTML into DOM
