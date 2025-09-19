@@ -291,7 +291,7 @@ body {
   height: 32px;
   border-radius: 6px;
 }
-.mission-card.locked {
+/* .mission-card.locked {
   opacity: 0.65;
   pointer-events: none;
   filter: grayscale(30%);
@@ -303,7 +303,19 @@ body {
   background: url('https://cdn-icons-png.flaticon.com/128/6989/6989364.png') no-repeat center center / cover;
   vertical-align: middle;
   margin-left: 8px;
+} */
+ .mission-card.locked {
+  opacity: 0.5;
 }
+.lock-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background: url('https://cdn-icons-png.flaticon.com/128/483/483408.png') no-repeat center center / cover;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
 /* Button style for locked mission */
 .locked-btn {
   background: #aaa;
@@ -664,7 +676,7 @@ function startExpiryCountdown(hideTime, domElement) {
     function update() {
         const text = formatExpiry(hideTime);
         if(text === 'Expired') {
-        domElement.textContent = 'Expired';
+        domElement.textContent = '';
         clearInterval(intervalId);
         } else {
         domElement.textContent = 'Expires: ' + text; // Prefix here
@@ -712,8 +724,9 @@ function renderChildMissions(children, parentIdx) {
     return `<div class="child-mission">
       <div class="mission-header">
         <div>
-          <div class="mission-title">${child.Title}
+          <div class="mission-title">
             ${isLocked ? '<span class="lock-icon"></span>' : ''}
+            ${child.Title}
           </div>
           <div class="mission-subtitle">${child.MissionCategory} • ${child.Progress}/${child.Requirement}</div>
         </div>
@@ -732,16 +745,21 @@ function renderChildMissions(children, parentIdx) {
       <div class="mission-footer">
         <span class="expiry" id="${expiryId}">${formatExpiry(child.ExpiryDate) ? 'Expires: ' + formatExpiry(child.ExpiryDate) : ''}</span>
         ${
-          isLocked
-            ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
-            : (
-              status === 'go'
-                ? (child.Deeplink
-                    ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
-                    : `<button class="btn go" disabled>Go</button>`)
-                : `<button class="btn ${status}">${statusText}</button>`
-            )
-        }
+  (child.Expired === 1 || (child.ExpiryDate && new Date(child.ExpiryDate) < new Date()))
+    ? `<button class="btn expired" disabled>Expired</button>`
+    : (
+      isLocked
+        ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
+        : (
+          status === 'go'
+            ? (child.Deeplink
+                ? `<a href="${child.Deeplink}" target="_blank" class="btn go">Go</a>`
+                : `<button class="btn go" disabled>Go</button>`)
+            : `<button class="btn ${status}">${statusText}</button>`
+        )
+    )
+}
+
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -825,8 +843,9 @@ function renderMissions(tag) {
     card.innerHTML = `
       <div class="mission-header">
         <div>
-          <div class="mission-title">${mission.Title}
+          <div class="mission-title">
             ${isLocked ? '<span class="lock-icon"></span>' : ''}
+            ${mission.Title}
             ${mission.MissionType === 'Group' && groupCompleted ? `<span class="btn completed" style="margin-left:12px;">Completed</span>` : ''}
           </div>
         </div>
@@ -848,10 +867,13 @@ function renderMissions(tag) {
       <div class="children-container"></div>
       <div class="mission-footer">
         ${mission.MissionType !== 'Group' ? (
-          isLocked 
-            ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
-            : `<button class="btn ${status}">${statusText}</button>`
-        ) : ''}
+  mission.Expired === 1 || (mission.ExpiryDate && new Date(mission.ExpiryDate) < new Date())
+    ? `<button class="btn expired" disabled>Expired</button>`
+    : isLocked 
+      ? '<button class="btn locked-btn" disabled><span class="lock-icon"></span> Locked</button>'
+      : `<button class="btn ${status}">${statusText}</button>`
+) : ''}
+
       </div>
     `;
 
